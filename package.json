@@ -1,0 +1,23 @@
+{
+  "name": "electron_shopping",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qapla47/electron_shopping.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/qapla47/electron_shopping/issues"
+  },
+  "homepage": "https://github.com/qapla47/electron_shopping#readme",
+  "dependencies": {
+    "electron": "^4.1.1"
+  }
+}
