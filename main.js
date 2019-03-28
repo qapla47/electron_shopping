@@ -2,7 +2,10 @@ const electron = require("electron");
 const url = require("url");
 const path = require("path");
 
-const { app, BrowserWindow, Menu } = electron;
+const { app, BrowserWindow, Menu, ipcMain, webContents } = electron;
+
+// set environment
+process.env.NODE_ENV = 'production';
 
 let mainWindow, addWindow;
 
@@ -20,9 +23,9 @@ app.on("ready", () => {
     })
   );
   // quit app when closed
-  mainWindow.on('closed', () => {
+  mainWindow.on("closed", () => {
     app.quit();
-  })
+  });
 
   // build menu from template
   const mainMenu = Menu.buildFromTemplate(mainMenuTemplate);
@@ -48,10 +51,17 @@ function createAddWindow() {
     })
   );
   // garbage collection handle
-  addWindow.on('close', () => {
+  addWindow.on("close", () => {
     addWindow = null;
-  })
+  });
 }
+
+// catch item:add
+ipcMain.on("item:add", (e, item) => {
+  mainWindow.webContents.send("item:add", item);
+  addWindow.close();
+});
+
 // create menu template
 const mainMenuTemplate = [
   {
@@ -63,7 +73,12 @@ const mainMenuTemplate = [
           createAddWindow();
         }
       },
-      { label: "Clear Items" },
+      {
+        label: "Clear Items",
+        click() {
+          mainWindow.webContents.send("item:clear");
+        }
+      },
       {
         label: "Quit",
         accelerator: process.platform == "darwin" ? "Command+Q" : "Ctrl+Q",
@@ -76,23 +91,25 @@ const mainMenuTemplate = [
 ];
 
 // if mac, add empty object to menu. this prevents the default electron menu from showing
-if (process.platform == 'darwin'){
-  mainMenuTemplate.unshift({})
+if (process.platform == "darwin") {
+  mainMenuTemplate.unshift({});
 }
 
 // add developer tools item if not in production
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== "production") {
   mainMenuTemplate.push({
-    label: 'Developer Tools',
-    submenu: [{
-      label: 'Toggle DevTools',
-      accelerator: process.platform == "darwin" ? "Command+I" : "Ctrl+I",
-      click(item, focusedWindow) {
-        focusedWindow.toggleDevTools();
+    label: "Developer Tools",
+    submenu: [
+      {
+        label: "Toggle DevTools",
+        accelerator: process.platform == "darwin" ? "Command+I" : "Ctrl+I",
+        click(item, focusedWindow) {
+          focusedWindow.toggleDevTools();
+        }
+      },
+      {
+        role: "reload"
       }
-    },{
-      role: 'reload'
-    }
-  ]
-  })
+    ]
+  });
 }
